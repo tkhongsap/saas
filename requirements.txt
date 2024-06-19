@@ -10,3 +10,4 @@ Requests==2.32.3
 sib_api_v3_sdk==7.6.0
 streamlit==1.30.0
 stripe==6.5.0
+bcrypt==3.2.0
