@@ -55,8 +55,8 @@ class Authenticate:
         user = users.find_one({'email': self.email})
         client.close()
         if user is not None:
-            hashed_pw = user['password']
-            return bcrypt.checkpw(self.password.encode(), hashed_pw.encode())
+            hashed_pw = user['password']  # Stored hash should remain as bytes
+            return bcrypt.checkpw(self.password.encode('utf-8'), hashed_pw)
         return False
 
     def _check_cookie(self):
@@ -150,7 +150,7 @@ class Authenticate:
                 st.session_state['verified'] = None
 
     def _update_password(self, email: str, password: str):
-        hashed_password = Hasher([password]).generate()[0]
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())  # Ensure the hash is in bytes
         client = MongoClient(self.mongo_uri)
         db = client[self.db_name]
         users = db['users']
@@ -204,7 +204,7 @@ class Authenticate:
         user_credentials = {
             'email': email,
             'name': name,
-            'password': Hasher([password]).generate()[0],
+            'password': bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()),  # Ensure the hash is in bytes
             'verified': False,
             'needs': needs,
             'postal_code': postal_code,
@@ -248,7 +248,6 @@ class Authenticate:
         response = requests.post(verification_url, json=data)
         if response.status_code != 200:
             print(f"Failed to send verification email: {response.text}")
-
 
     def register_user(self, form_name: str, location: str='main', preauthorization=True) -> bool:
         def validate_email(email):
@@ -308,7 +307,7 @@ class Authenticate:
 
     def _set_random_password(self, email: str) -> str:
         self.random_password = generate_random_pw()
-        hashed_password = Hasher([self.random_password]).generate()[0]
+        hashed_password = bcrypt.hashpw(self.random_password.encode('utf-8'), bcrypt.gensalt())  # Ensure the hash is in bytes
         client = MongoClient(self.mongo_uri)
         db = client[self.db_name]
         users = db['users']

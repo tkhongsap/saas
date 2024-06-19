@@ -16,7 +16,7 @@ st.set_page_config(page_title="SaaS", page_icon=":house", layout="centered", ini
 # Load environment variables
 
 # Display the main title
-st.markdown('#SaaS App')
+st.markdown('# SaaS App')
 
 # Initialize the authenticator
 if 'authenticator' not in st.session_state:
